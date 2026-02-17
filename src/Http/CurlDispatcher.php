@@ -99,7 +99,9 @@ final class CurlDispatcher
             curl_multi_remove_handle($multi, $curlHandle);
         }
 
-        curl_multi_close($multi);
+        if (PHP_VERSION_ID < 80000) {
+            curl_multi_close($multi);
+        }
 
         return array_map(
             fn ($connection) => $connection->getResponse($responseFactory),
@@ -160,8 +162,10 @@ final class CurlDispatcher
             $this->error(curl_error($curlHandle), $errno);
         }
 
-        /** @phpstan-ignore argument.type (PHP 7.4/8.0 compatibility) */
-        curl_close($curlHandle);
+        if (PHP_VERSION_ID < 80000) {
+            /** @phpstan-ignore argument.type (PHP 7.4/8.0 compatibility) */
+            curl_close($curlHandle);
+        }
 
         $response = $responseFactory->createResponse($info['http_code']);
 
